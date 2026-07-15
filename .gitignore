@@ -16,6 +16,7 @@ results/*
 !results/default_model/
 !results/default_model/**
 bead_count_vs_*.png
+!bead_count_vs_logp_ee_itp_739.png
 
 # Tooling
 .pytest_cache/

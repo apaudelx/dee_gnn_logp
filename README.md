@@ -150,5 +150,5 @@ The bead type ID mapping used during training is saved as `bead_type_to_id.json`
 ## Bead Count vs logP Plot
 
 ```bash
-python utils/plot_bead_count_vs_encapsulation.py --csv data/logp_values.csv --data data/ee_itp_739/
+python utils/plot_bead_count_vs_logp.py --csv data/logp_values.csv --data data/ee_itp_739/
 ```

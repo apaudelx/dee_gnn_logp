@@ -63,7 +63,7 @@ def main() -> None:
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--csv", required=True, help="CSV with compound and logP")
-    ap.add_argument("--data", default="filtered_training_data", help="Data root with .itp files")
+    ap.add_argument("--data", default="data/ee_itp_739", help="Data root with .itp files")
     ap.add_argument("--out", default=None, help="Output image")
     ap.add_argument("--id-col", default="compound", help="Compound id column")
     ap.add_argument("--y-col", default="logP", help="Target column")
@@ -109,7 +109,7 @@ def main() -> None:
         out_path = args.out
     else:
         folder_name = Path(args.data).name
-        out_path = f"bead_count_vs_{y_label}_{folder_name}.png"
+        out_path = f"bead_count_vs_{y_label.lower()}_{folder_name}.png"
     plt.savefig(out_path, dpi=200)
     print(f"Wrote plot to {out_path}")
 
