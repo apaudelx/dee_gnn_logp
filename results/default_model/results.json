@@ -1,0 +1,52 @@
+{
+  "config": {
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "weight_decay": 1e-05,
+    "max_epochs": 1000,
+    "early_stopping_patience": 100,
+    "hidden_dim": 128,
+    "num_layers": 3,
+    "dropout": 0.2,
+    "node_dim": 5,
+    "num_bead_types": 168,
+    "embedding_dim": 32,
+    "edge_dim": 3,
+    "data_split": {
+      "method": "random",
+      "seed": 121,
+      "ratios": {
+        "train": 0.8,
+        "validation": 0.1,
+        "test": 0.1
+      }
+    }
+  },
+  "split": {
+    "method": "random",
+    "seed": 121,
+    "ratios": {
+      "train": 0.8,
+      "validation": 0.1,
+      "test": 0.1
+    }
+  },
+  "train_metrics": {
+    "mae": 0.30195486545562744,
+    "mse": 0.273801326751709,
+    "r2": 0.9774005189538002,
+    "spearman": 0.9889684416488049
+  },
+  "val_metrics": {
+    "mae": 0.6477319002151489,
+    "mse": 2.620274782180786,
+    "r2": 0.7481979429721832,
+    "spearman": 0.8726314152880122
+  },
+  "test_metrics": {
+    "mae": 0.6419274210929871,
+    "mse": 3.958402156829834,
+    "r2": 0.6719275116920471,
+    "spearman": 0.8854267710481244
+  }
+}

@@ -1,0 +1,25 @@
+# macOS specific
+.DS_Store
+
+# Python bytescode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+venv/
+.venv/
+
+# Keep the included default model; ignore additional local training runs
+results/*
+!results/default_model/
+!results/default_model/**
+bead_count_vs_*.png
+
+# Tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.idea/
+.vscode/

@@ -1,0 +1,118 @@
+#!/usr/bin/env python3
+import argparse
+from pathlib import Path
+from typing import Optional
+import pandas as pd
+import matplotlib.pyplot as plt
+
+SECTION_HEADER = "["
+COMMENT_PREFIXES = (";", "#")
+
+
+def iter_atoms_section(lines):
+    in_atoms = False
+    for line in lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith(SECTION_HEADER) and s.endswith("]"):
+            in_atoms = s.strip("[] ").lower() == "atoms"
+            continue
+        if not in_atoms:
+            continue
+        if s.startswith(COMMENT_PREFIXES):
+            continue
+        yield s
+
+
+def count_beads_in_itp(itp_path: Path) -> int:
+    lines = itp_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    count = 0
+    for s in iter_atoms_section(lines):
+        parts = s.split()
+        if len(parts) >= 2:
+            count += 1
+    return count
+
+
+def find_itp(compound_dir: Path) -> Optional[Path]:
+    exact = compound_dir / f"{compound_dir.name}.itp"
+    if exact.is_file():
+        return exact
+    for itp in compound_dir.glob("*.itp"):
+        return itp
+    return None
+
+
+def build_bead_counts(data_root: Path) -> dict[str, int]:
+        counts: dict[str, int] = {}
+        # Scan all immediate subdirectories of data_root
+        if not data_root.is_dir():
+            return counts
+        for compound_dir in data_root.iterdir():
+            if not compound_dir.is_dir():
+                continue
+            itp_path = find_itp(compound_dir)
+            if itp_path is None:
+                continue
+            counts[compound_dir.name] = count_beads_in_itp(itp_path)
+        return counts
+
+
+def main() -> None:
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--csv", required=True, help="CSV with compound and logP")
+    ap.add_argument("--data", default="filtered_training_data", help="Data root with .itp files")
+    ap.add_argument("--out", default=None, help="Output image")
+    ap.add_argument("--id-col", default="compound", help="Compound id column")
+    ap.add_argument("--y-col", default="logP", help="Target column")
+    args = ap.parse_args()
+
+    df = pd.read_csv(args.csv)
+    if args.id_col not in df.columns or args.y_col not in df.columns:
+        raise SystemExit("CSV must contain id and target columns")
+
+    counts = build_bead_counts(Path(args.data))
+    df["bead_count"] = df[args.id_col].map(counts)
+    df = df.dropna(subset=["bead_count", args.y_col])
+
+    if df.empty:
+        raise SystemExit("No rows matched between CSV and data folder")
+
+    plt.figure(figsize=(12, 4))
+
+    plt.subplot(1, 3, 1)
+    plt.hist(df["bead_count"], bins=9, color="#1f77b4", alpha=0.85)
+    plt.xlabel("Bead count")
+    plt.ylabel("Molecules")
+    plt.title("Bead Count Distribution")
+
+    y_label = args.y_col
+
+    plt.subplot(1, 3, 2)
+    plt.hist(df[args.y_col], bins=20, color="#ff7f0e", alpha=0.85)
+    plt.xlabel(y_label)
+    plt.ylabel("Molecules")
+    plt.title(f"{y_label} Distribution")
+
+    plt.subplot(1, 3, 3)
+    plt.scatter(df["bead_count"], df[args.y_col], s=12, alpha=0.7, color="#2ca02c")
+    plt.xlabel("Bead count")
+    plt.ylabel(y_label)
+    plt.title(f"Bead Count vs {y_label}")
+
+    plt.tight_layout()
+
+    # Default output path: bead_count_vs_<ycol>_<data_folder>.png in the root directory
+    if args.out:
+        out_path = args.out
+    else:
+        folder_name = Path(args.data).name
+        out_path = f"bead_count_vs_{y_label}_{folder_name}.png"
+    plt.savefig(out_path, dpi=200)
+    print(f"Wrote plot to {out_path}")
+
+
+if __name__ == "__main__":
+    main()
